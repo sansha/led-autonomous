@@ -9,6 +9,9 @@ const int LDR_PIN = 3; // Pin the LDR light sensor is connected to
 const int LIGHT_DELAY_MS = 10000; // time for which the light shall stay on when a motion is detected
 const int FADE_DELAY_MS = 10; // _delay_ms at each step of fading
 
+const byte ON_VALUE = 255;
+const byte OFF_VALUE = 0;
+
 int current_brightness = 0;
 unsigned long light_on_ms = 0L;
 
@@ -19,18 +22,21 @@ void setup() {
     pinMode(PIR_PIN, INPUT);
     pinMode(LDR_PIN, INPUT);
     pinMode(LED_PIN, OUTPUT);
+
+    // turn LEDs "off"
+    fade(OFF_VALUE);
 }
 
 void loop(){
     // turn the light on if the PIR shows a motion
     if(digitalRead(PIR_PIN) == 1) {
-        fade(255);
+        fade(ON_VALUE);
         light_on_ms = millis();
     } else if(millis() - light_on_ms < LIGHT_DELAY_MS) {
         Serial.println("waiting");
     }
     if(millis() - light_on_ms >= LIGHT_DELAY_MS) {
-        fade(0);
+        fade(OFF_VALUE);
     }
 
     _delay_ms(100);
