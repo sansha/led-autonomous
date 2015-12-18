@@ -1,7 +1,3 @@
-#include <avr/io.h>
-#define F_CPU 16000000UL // we need to define cpu frequency, it's 16MHz for ATmega328
-#include <util/delay.h>
-#include <Arduino.h>
 const int LED_PIN = 9; // Pin the transistor is connected to // pin 9 (PB1) with OCR1A
 const int PIR_PIN = 2; // Pin the PIR motion sensor is connected to
 const int LDR_PIN = A0; // Pin the LDR light sensor is connected to
