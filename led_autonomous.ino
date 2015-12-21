@@ -3,7 +3,7 @@ const int PIR_PIN = 2; // Pin the PIR motion sensor is connected to
 const int LDR_PIN = A0; // Pin the LDR light sensor is connected to
 
 const long LIGHT_DELAY_MS = 1000 /* 60000L*/; // time for which the light shall stay on when a motion is detected (millis)
-const long FADE_DELAY_MS = 5L; // _delay_ms at each step of fading
+const long FADE_DELAY_MS = 5L; // delay at each step of fading
 const int BRIGHTNESS_THRESHOLD = 100; // threshold for brightness (if sensor value read is <= threshold, light will be on)
 
 const byte ON_VALUE = 31;
@@ -43,7 +43,7 @@ void loop(){
      Serial.println("light off");
      fade(OFF_VALUE);// turn off
   }
-  _delay_ms(100);
+  delay(100);
 }
 
 
@@ -54,13 +54,13 @@ void fade(int target_brightness_level) {
       while(current_brightness > target_brightness_level) {
           analogWrite(LED_PIN, pwm_table[--current_brightness]); // increase current_brightness and apply to register
           Serial.println(pwm_table[current_brightness]);
-          _delay_ms(FADE_DELAY_MS);
+          delay(FADE_DELAY_MS);
       }
   } else if(target_brightness_level > current_brightness) { // fade up
       while(current_brightness < target_brightness_level) {
           analogWrite(LED_PIN, pwm_table[++current_brightness]); // increase current_brightness and apply to register
           Serial.println(pwm_table[current_brightness]);
-          _delay_ms(FADE_DELAY_MS);
+          delay(FADE_DELAY_MS);
       }
   }
 }
