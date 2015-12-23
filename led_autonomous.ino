@@ -1,16 +1,23 @@
-//const int LED_PIN = 9; // Pin the transistor is connected to // pin 9 (PB1) with OCR1A
-const int PIR_PIN = 2; // Pin the PIR motion sensor is connected to
+//CONFIG
+//in hwpwm the LED_PIN is hard coded to pin 9 
+const int LED_PIN = 9; // Pin the transistor is connected to // pin 9 (PB1) with OCR1A
+const int PIR_PIN_1 = 2; // Pin the 1st PIR motion sensor is connected to
+const int PIR_PIN_2 = 3; // Pin the 2nd PIR motion sensor is connected to
 const int LDR_PIN = A0; // Pin the LDR light sensor is connected to
+
+
 
 const long LIGHT_DELAY_MS = 5 * 60000L; // time for which the light shall stay on when a motion is detected (millis)
 const long FADE_DELAY_MS = 7L; // delay at each step of fading
 const int BRIGHTNESS_THRESHOLD = 100; // threshold for brightness (if sensor value read is <= threshold, light will be on)
 
 const byte ON_VALUE = 255;
+
 const byte OFF_VALUE = 0;
 
 int current_brightness = 0;
 unsigned long light_on_ms = 0L;
+
 //const uint8_t pwm_table[32] = {0, 1, 2, 2, 2, 3, 3, 4, 5, 6, 7, 8, 9, 11, 13, 16, 19, 23, 27, 32, 38, 45, 54, 64, 76, 90, 107, 128, 152, 180, 214, };
 const uint16_t pwm_table[256] =
 {
@@ -59,9 +66,13 @@ void setup() {
 
     DDRB |= 0b000000110;  //set pin 9 and 10 as output
 
+
     // pin direction definitions
-    pinMode(PIR_PIN, INPUT);
+    pinMode(PIR_PIN_1, INPUT);
+    pinMode(PIR_PIN_2, INPUT);
     pinMode(LDR_PIN, INPUT);
+
+    pinMode(LED_PIN, OUTPUT);
 
     // turn LEDs "off"
     fade(OFF_VALUE);
