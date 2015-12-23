@@ -1,5 +1,6 @@
 const int LED_PIN = 9; // Pin the transistor is connected to // pin 9 (PB1) with OCR1A
-const int PIR_PIN = 2; // Pin the PIR motion sensor is connected to
+const int PIR_PIN_1 = 2; // Pin the 1st PIR motion sensor is connected to
+const int PIR_PIN_2 = 3; // Pin the 2nd PIR motion sensor is connected to
 const int LDR_PIN = 3; // Pin the LDR light sensor is connected to
 
 const long LIGHT_DELAY_MS = 5 * 60000L; // time for which the light shall stay on when a motion is detected (millis)
@@ -59,7 +60,8 @@ void setup() {
     DDRB |= 0b000000110;  //set pin 9 and 10 as output
 
     // pin direction definitions
-    pinMode(PIR_PIN, INPUT);
+    pinMode(PIR_PIN_1, INPUT);
+    pinMode(PIR_PIN_2, INPUT);
     pinMode(LDR_PIN, INPUT);
     pinMode(LED_PIN, OUTPUT);
 
@@ -69,7 +71,7 @@ void setup() {
 
 void loop(){
     // turn the light on if the PIR shows a motion
-    if(digitalRead(PIR_PIN) == 1) {
+    if(digitalRead(PIR_PIN_1) == 1 || digitalRead(PIR_PIN_2)) {
         fade(ON_VALUE);
         light_on_ms = millis();
     } else if(millis() - light_on_ms < LIGHT_DELAY_MS) {
