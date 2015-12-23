@@ -4,6 +4,7 @@ const int LED_PIN = 9; // Pin the transistor is connected to // pin 9 (PB1) with
 const int PIR_PIN_1 = 2; // Pin the 1st PIR motion sensor is connected to
 const int PIR_PIN_2 = 3; // Pin the 2nd PIR motion sensor is connected to
 const int LDR_PIN = A0; // Pin the LDR light sensor is connected to
+const int MODE_PIN = 4; // Pin the Mode switch is connected to
 
 
 
@@ -13,8 +14,10 @@ const int BRIGHTNESS_THRESHOLD = 100; // threshold for brightness (if sensor val
 
 const byte ON_VALUE = 255;
 
-const byte OFF_VALUE = 0;
+const byte OFF_VALUE_MODE_0 = 0;
+const byte OFF_VALUE_MODE_1 = 20;
 
+byte off_value = 0;
 int current_brightness = 0;
 unsigned long light_on_ms = 0L;
 
@@ -70,21 +73,26 @@ void setup() {
     // pin direction definitions
     pinMode(PIR_PIN_1, INPUT);
     pinMode(PIR_PIN_2, INPUT);
-    pinMode(LDR_PIN, INPUT);
-
+    pinMode(LDR_PIN, INPUT);  
+    pinMode(MODE_PIN, INPUT);
     pinMode(LED_PIN, OUTPUT);
-
+    
+    //read off value (depends on mode switch)
+    off_value = readOffValue();
+    
     // turn LEDs "off"
-    fade(OFF_VALUE);
+    fade(off_value);
 }
 
 void loop(){
+  //read off value (depends on mode switch)
+  off_value = readOffValue();
   int brightness_ldr = analogRead(LDR_PIN);
   Serial.print("brightness:");
   Serial.println(brightness_ldr);
   if(brightness_ldr <= BRIGHTNESS_THRESHOLD || current_brightness == ON_VALUE) { // if ambient brightness low OR already on
     // turn the light on if the PIR shows a motion
-    if(digitalRead(PIR_PIN) == 1) { // if motion detected
+    if(digitalRead(PIR_PIN_1) == 1 || digitalRead(PIR_PIN_1)) { // if motion detected
       Serial.println("Motion -> light on");
         fade(ON_VALUE); // turn on
       light_on_ms = millis(); // save time the lights were turned on
@@ -93,11 +101,23 @@ void loop(){
   // check if wait time is over
   if(millis() - light_on_ms >= LIGHT_DELAY_MS) {
      Serial.println("light off");
-     fade(OFF_VALUE);// turn off
+     fade(off_value);// turn off
   }
   delay(100);
 }
 
+byte readOffValue(void)
+{
+  if (digitalRead(MODE_PIN) == HIGH)
+    {
+      return OFF_VALUE_MODE_1;
+    }
+    else
+    {
+      return OFF_VALUE_MODE_0;
+    }
+}
+ 
 
 void fade(int target_brightness_level) {
     if(target_brightness_level == current_brightness) {
