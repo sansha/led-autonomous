@@ -1,4 +1,8 @@
 //CONFIG
+//THERE ARE 2 MODES
+//MODE1: day: light on, if motion detected it increases its brightness for a short time
+//MODE0: night: light is off, if motion is detected it turns on (but is not too bright)
+
 //in hwpwm the LED_PIN is hard coded to pin 9 
 const int LED_PIN = 9; // Pin the transistor is connected to // pin 9 (PB1) with OCR1A
 const int PIR_PIN_1 = 4; // Pin the 1st PIR motion sensor is connected to
@@ -7,16 +11,19 @@ const int LDR_PIN = A0; // Pin the LDR light sensor is connected to
 const int MODE_PIN = 12; // Pin the Mode switch is connected to
 
 
-const long LIGHT_DELAY_MS = 1000L; // time for which the light shall stay on when a motion is detected (millis)
+const long LIGHT_DELAY_MS_MODE_0 = 5000L; // time for which the light shall stay on when a motion is detected (millis)
+const long LIGHT_DELAY_MS_MODE_1 = 100L; // time for which the light shall stay on when a motion is detected (millis)
 //const long LIGHT_DELAY_MS = 5 * 60000L; // time for which the light shall stay on when a motion is detected (millis)
 const long FADE_DELAY_MS = 7L; // delay at each step of fading
-const int BRIGHTNESS_THRESHOLD = 600; // threshold for brightness (if sensor value read is <= threshold, light will be on)
+const int BRIGHTNESS_THRESHOLD = 450; // threshold for brightness (if sensor value read is <= threshold, light will be on)
 
-const byte ON_VALUE = 190;
-
+const byte ON_VALUE_MODE_0 = 200;
+const byte ON_VALUE_MODE_1 = 255;
 const byte OFF_VALUE_MODE_0 = 0;
-const byte OFF_VALUE_MODE_1 = 100;
+const byte OFF_VALUE_MODE_1 = 200;
 
+long delay_ms = LIGHT_DELAY_MS_MODE_0;
+byte on_value = ON_VALUE_MODE_0;
 byte off_value = 0;
 int current_brightness = 0;
 unsigned long light_on_ms = 0L;
@@ -47,7 +54,7 @@ const uint16_t pwm_table[256] =
 };
 
 void setup() {
-    Serial.begin(9600);
+    //Serial.begin(9600);
 
 
     //HWPWM INIT
@@ -78,7 +85,7 @@ void setup() {
     pinMode(LED_PIN, OUTPUT);
     
     //read off value (depends on mode switch)
-    off_value = readOffValue();
+     readModeValues();
     
     // turn LEDs "off"
     fade(off_value);
@@ -86,37 +93,41 @@ void setup() {
 
 void loop(){
   //read off value (depends on mode switch)
-  off_value = readOffValue();
+  readModeValues();
   Serial.print("off_value: ");
   Serial.println(off_value);
   int brightness_ldr = analogRead(LDR_PIN);
   Serial.print("brightness:");
   Serial.println(brightness_ldr);
-  if(brightness_ldr <= BRIGHTNESS_THRESHOLD || current_brightness == ON_VALUE) { // if ambient brightness low OR already on
+  if(brightness_ldr <= BRIGHTNESS_THRESHOLD || current_brightness == on_value) { // if ambient brightness low OR already on
     // turn the light on if the PIR shows a motion
     if(digitalRead(PIR_PIN_1) == 1 || digitalRead(PIR_PIN_2)) { // if motion detected
       Serial.println("Motion -> light on");
-        fade(ON_VALUE); // turn on
+        fade(on_value); // turn on
       light_on_ms = millis(); // save time the lights were turned on
     }
   }
   // check if wait time is over
-  if(millis() - light_on_ms >= LIGHT_DELAY_MS) {
+  if(millis() - light_on_ms >= delay_ms) {
      Serial.println("light off");
      fade(off_value);// turn off
   }
-  delay(100);
+  delay(50);
 }
 
-byte readOffValue(void)
+void readModeValues(void)
 {
   if (digitalRead(MODE_PIN) == HIGH)
     {
-      return OFF_VALUE_MODE_1;
+      off_value = OFF_VALUE_MODE_1;
+      on_value = ON_VALUE_MODE_1;
+      delay_ms = LIGHT_DELAY_MS_MODE_1;
     }
     else
     {
-      return OFF_VALUE_MODE_0;
+      off_value = OFF_VALUE_MODE_0;
+      on_value = ON_VALUE_MODE_0;
+      delay_ms = LIGHT_DELAY_MS_MODE_0;
     }
 }
  
